@@ -1,14 +1,48 @@
-import { React, useState } from "react"
+import { React } from "react"
 import { Link } from 'expo-router'
-import { View, Button, StyleSheet, Text, TextInput } from "react-native"
+import { View, StyleSheet, Text, TextInput, Pressable } from "react-native"
 import { useForm, Controller } from 'react-hook-form'
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+
+const schema = yup.object({
+    email: yup.string().email('Informe um email válido').required('Informe um email válido'),
+    password: yup.string().required('Informe uma senha válida'),
+})
 
 function Login() {
 
-    const { control, handleSubmit, formState: { errors } } = useForm()
+    const { control, handleSubmit, formState: { errors } } = useForm({
+        resolver: yupResolver(schema)
+    })
 
-    function logarUsuario() {
-        alert('Hello World')
+    async function logarUsuario(data) {
+
+        try {
+            const login = fetch('localhost:3000/login', {
+                method: "POST",
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                },
+
+                body: JSON.stringify(data)
+            })
+                .then((response) => alert(response.json()))
+
+
+            await AsyncStorage.setItem('userConfig', JSON.stringify(login))
+
+            router.replace(`../user/${login.id}`)
+
+        }
+
+        catch (error) {
+            alert(error)
+        }
+
     }
 
     return (
@@ -23,16 +57,19 @@ function Login() {
                     <Text style={styles.inputContainerTitle}>Nome de usuário:</Text>
                     <Controller
                         control={control}
-                        name="userName"
-                        render={({ field: onChange, value }) => (
+                        name="email"
+                        render={({ field: { onChange, onBlur, value } }) => (
                             <TextInput
                                 style={styles.inputStyle}
                                 onChangeText={onChange}
+                                onBlur={onBlur}
                                 value={value}
-                                placeholder="Nome de usuário"
+                                placeholder="Insira seu email"
+                                keyboardType="email-address"
                             />
                         )}
                     />
+                    {errors.email && <Text style={styles.labelErrorText}>{errors.email?.message} </Text>}
                 </View>
                 <View style={styles.inputContainer}>
                     <Text style={styles.inputContainerTitle}>Senha:</Text>
@@ -50,15 +87,17 @@ function Login() {
                             />
                         )}
                     />
-            </View>
-                <Button
-                    style={styles.buttonOptions}
-                    onPress={handleSubmit(logarUsuario)}
-                    title="Logar"
-                />
+                    {errors.password && <Text style={styles.labelErrorText}>{errors.password?.message} </Text>}
+
+                        <Pressable
+                            style={styles.buttonOptions}
+                            onPress={handleSubmit(logarUsuario)}>
+                            <Text style={styles.buttonText}>Logar</Text>
+                        </Pressable>
+                </View>
                 <View style={{ flexDirection: 'row' }}>
                     <Text>Não tem uma conta? </Text>
-                    <Link href={"/cadastro"}>Cadastre-se</Link>
+                    <Link href={"/cadastro"} style={{ color: '#0369a1' }}>Cadastre-se</Link>
                 </View>
             </View>
         </View>
@@ -80,7 +119,7 @@ const styles = StyleSheet.create({
     },
     textHeader: {
         fontSize: 28,
-        color:'#fff',
+        color: '#fff',
         fontWeight: 'bold'
     },
 
@@ -105,4 +144,23 @@ const styles = StyleSheet.create({
         marginBottom: 12,
         fontSize: 16
     },
+    labelErrorText: {
+        marginBottom: 4,
+        color: '#ef4444'
+    },
+
+    buttonOptions: {
+        alignItems: 'center',
+        borderRadius: 50,
+        backgroundColor: '#192841',
+        padding: 10,
+        width: '35%',
+        margin: 16,
+        alignSelf: 'center'
+    },
+    buttonText: {
+        color: '#fff',
+        fontWeight: 'bold',
+        fontSize: 18
+    }
 });
