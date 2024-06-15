@@ -1,5 +1,5 @@
 import { Link } from "expo-router";
-import { Image, Text, TouchableOpacity, View, StyleSheet } from "react-native";
+import { Image, Text, View, StyleSheet, Pressable } from "react-native";
 
 export default function Index() {
 
@@ -18,13 +18,16 @@ export default function Index() {
         <Text style={styles.text}>O que deseja fazer?</Text>
 
         <View style={styles.containerButton}>
-          <TouchableOpacity style={styles.button}>
-            <Link href={"/login"} style={styles.buttonText}>Login</Link>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.button}>
-            <Link href={"/cadastro"} style={styles.buttonText}>Cadastro</Link>
-          </TouchableOpacity>
+          <Link href={"/login"} asChild>
+            <Pressable style={styles.buttonOptions}>
+              <Text  style={styles.buttonText}>Login</Text>
+            </Pressable>
+          </Link>
+          <Link href={"/cadastro"} asChild>
+            <Pressable style={styles.buttonOptions}>
+              <Text  style={styles.buttonText}>Cadastro</Text>
+            </Pressable>
+          </Link>
         </View>
       </View>
     </View>
@@ -63,7 +66,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#a1a1a1',
-    marginBottom: 50,
+    marginBottom: 30,
     fontSize: 18
   },
   button: {
@@ -72,6 +75,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#192841',
     padding: 10,
     width: '35%',
+  },
+  buttonOptions: {
+    alignItems: 'center',
+    borderRadius: 50,
+    backgroundColor: '#192841',
+    padding: 10,
+    width: '35%',
+    margin: 16,
+    alignSelf: 'center'
   },
   buttonText: {
     color: '#fff',
